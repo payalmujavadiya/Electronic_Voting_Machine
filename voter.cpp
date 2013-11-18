@@ -30,14 +30,19 @@ char fname[80];
 short age;
 char gender;
 char address[80];
+int votes;
 public:
 void getData();
 void showData();
+void showData1();
 void view();
+void view1();
+void view2();
 void add_data(Candidate c);
 int allotpersonid();
 void searchperson();
 void modifyperson();
+void modifyperson1();
 void deleteperson();
 };
 
@@ -231,6 +236,31 @@ is.read(reinterpret_cast<char*>(this),sizeof(*this));
 }
 is.close();
 }
+void Candidate::view1(){
+cout << "\033[2J\033[1;1H";
+ifstream is("candidate.txt",ios::binary);
+cout<<"\ncandidateid"<<setw(10)<<"Name\n";
+is.seekg(0,ios::beg);
+is.read(reinterpret_cast<char*>(this),sizeof(*this));
+while(!is.eof()){
+showData1();
+is.read(reinterpret_cast<char*>(this),sizeof(*this));
+}
+}
+void Candidate::view2(){
+cout << "\033[2J\033[1;1H";
+ifstream is("candidate.txt",ios::binary);
+cout<<"\ncandidateid"<<setw(10)<<"Name"<<setw(15)<<"Votes\n";
+is.seekg(0,ios::beg);
+is.read(reinterpret_cast<char*>(this),sizeof(*this));
+while(!is.eof()){
+cout << cid << setw(20);
+cout << name << setw(15);
+cout<< votes <<"\n";
+is.read(reinterpret_cast<char*>(this),sizeof(*this));
+}
+}
+
 void Candidate::add_data(Candidate c){
 fstream os("candidate.txt",ios::out|ios::binary|ios::app);
 c.getData();
@@ -245,6 +275,7 @@ cout << "Enter Father's/husband's name: "; cin >> fname;
 cout << "Enter age: "; cin >> age;
 cout << "Enter gender: "; cin >> gender;
 cout << "Enter Address: "; cin >> address;
+votes=0;
 cid=allotpersonid();
 
 }
@@ -255,6 +286,10 @@ cout << fname << setw(20);
 cout <<  age <<setw(10);
 cout << gender << setw(15);
 cout <<  address <<"\n";
+}
+void Candidate::showData1(){
+cout << cid << setw(20);
+cout << name << "\n";
 }
 
 int Candidate::allotpersonid()
@@ -305,6 +340,42 @@ void Candidate::searchperson()
      }
      fin.close();
 }
+
+void Candidate:: modifyperson1()
+{
+     int id,r=0;
+     fstream file;
+     file.open("candidate.txt",ios::in|ios::out|ios::ate|ios::binary);
+     cout<<"\nEnter candidate id to whom you want to give vote: ";
+     cin>>id;
+     file.seekg(0);
+     if(!file)
+             cout<<"File not found";
+     else
+     {
+         file.read(reinterpret_cast<char*>(this),sizeof(*this));
+        
+         while(!file.eof())
+         {
+           r++;
+           if(cid==id)
+           {
+             
+            votes=votes+1;
+             file.seekp((r-1)*sizeof(Candidate),ios::beg);
+             file.write((char*)this,sizeof(*this));
+             break;
+           }
+           file.read(reinterpret_cast<char*>(this),sizeof(*this));
+         cout<<"\nYour vote has been recorded successfully\n";
+         }
+         if(file.eof())
+                      cout<<"Invalid option ";
+     }     
+         file.close();
+}
+
+
 void Candidate:: modifyperson()
 {
      int id,r=0;
@@ -398,15 +469,29 @@ void Candidate:: deleteperson()
 
 
 int main(){
-char ch,ch1,ch2;
-int n,choice,choice1,choice2;
+char adpass[20]="ad123";
+char adpass1[20];
+char ch,ch1,ch2,ch3,ch4;
+int n,choice,choice1,choice2,choice3,choice4;
 Candidate can,can1;
 Voter pers,pers1;
+do{
+          cout << "\033[2J\033[1;1H";
+cout<<"\n1. Admin\n";
+cout<<"\n2. Voter\n";
+cout<<"\n3.Exit\n";
+cout<<"\nEnter your choice\t";
+cin>>choice3;
+switch(choice3){
+case 1:cout<<"Enter passkey\t";
+cin>>adpass1;
+if(strcmp(adpass1,adpass)==0){
 do{
 cout << "\033[2J\033[1;1H";
 cout<<"\n1. About Voters\n";
 cout<<"\n2.About Candidates\n";
-cout<<"\n3.Exit\n";
+cout<<"\n3.View voter pole\n";
+cout<<"\n4.Exit\n";
 cout<<"\nEnter your choice\t";
 cin>>choice;
 switch(choice){
@@ -434,8 +519,7 @@ switch(choice1)
              break;
       case 5:pers.deleteperson();
              break;
-    case 6:return 1;
-             break;
+    case 6:  break;
 
 
        
@@ -469,20 +553,46 @@ switch(choice2)
              break;
       case 5:can.deleteperson();
              break;
-    case 6:return 1;
-             break;
+    case 6:break;
 }
 cout<<"\nDo you want to continue with candidates\t";
 cin>>ch1;
 }while(ch1=='y'or ch1=='Y');
 //PRINTING SAVED DATA IN FILE.
 break;
+case 3:can.view2();break;
+case 4:break;
+}
+cout<<"\nDo you want to continue as Admin\t";
+cin>>ch2;
+
+}while(ch2=='y' or ch2=='Y');}
+else cout<<"Wrong passkey";
+break;
+case 2:do{
+cout << "\033[2J\033[1;1H";
+cout<<"\n1.Start voting.\n";
+cout<<"\n6.Exit.\n";
+cout<<"\nEnter your choice\t";
+
+cin>>choice4;
+switch(choice4)
+{
+           case 1:can.view1();
+                   can.modifyperson1();
+             break;
+         case 6:break;
+}
+cout<<"\nDo you want to continue as Voter\t";
+cin>>ch4;
+}while(ch4=='y'or ch4=='Y');
+break;
+
 case 3:return 1;
 break;
 }
-cout<<"\nDo you want to continue\t";
-cin>>ch2;
-
-}while(ch2=='y' or ch2=='Y');
+cout<<"\nDo you want to continue with this machine\t";
+cin>>ch3;
+}while(ch3=='y'||ch3=='Y');
 return 0;
 }
